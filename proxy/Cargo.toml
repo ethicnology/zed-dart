@@ -1,0 +1,13 @@
+[package]
+name = "dart-lsp-proxy"
+version = "0.1.0"
+edition = "2021"
+description = "LSP proxy that injects triggerCharacters into the Dart language server initialize response"
+license = "Apache-2.0"
+
+[[bin]]
+name = "dart-lsp-proxy"
+path = "src/main.rs"
+
+[dependencies]
+serde_json = "1"

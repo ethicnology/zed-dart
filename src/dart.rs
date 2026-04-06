@@ -192,12 +192,25 @@ impl zed::Extension for DartExtension {
         worktree: &zed::Worktree,
     ) -> Result<zed::Command> {
         let dart_binary = self.language_server_binary(language_server_id, worktree)?;
+        let dart_args = dart_binary.args.unwrap_or_else(|| {
+            vec!["language-server".to_string(), "--protocol=lsp".to_string()]
+        });
+
+        // Use dart-lsp-proxy if available to inject triggerCharacters into the
+        // initialize response. Workaround for https://github.com/zed-extensions/dart/issues/32
+        if let Some(proxy) = worktree.which("dart-lsp-proxy") {
+            let mut args = vec![dart_binary.path];
+            args.extend(dart_args);
+            return Ok(zed::Command {
+                command: proxy,
+                args,
+                env: Default::default(),
+            });
+        }
 
         Ok(zed::Command {
             command: dart_binary.path,
-            args: dart_binary.args.unwrap_or_else(|| {
-                vec!["language-server".to_string(), "--protocol=lsp".to_string()]
-            }),
+            args: dart_args,
             env: Default::default(),
         })
     }
